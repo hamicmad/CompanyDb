@@ -1,11 +1,15 @@
-﻿
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace EfDb.Repositories
 {
     public class TeamRepo
     {
-        public static void CreateTeam(AppEfContext db, string name, int managersAmount)
+        private readonly AppEfContext db;
+        public TeamRepo()
+        {
+         db = new AppEfContext();
+        }
+        public void CreateTeam(string name, int managersAmount)
         {
             var team = new Team() { Name = name, ManagersAmount = managersAmount };
 
@@ -13,14 +17,14 @@ namespace EfDb.Repositories
             db.SaveChangesAsync();
         }
 
-        public static List<Team> ReadTeams(AppEfContext db)
+        public  List<Team> ReadTeams()
         {
             return db.Teams.Include(t => t.Users).ToList();
         }
 
-        public static void UpdateTeam(AppEfContext db, string name)
+        public void UpdateTeam(int teamId)
         {
-            var team = db.Teams.FirstOrDefault(t => t.Name == name);
+            var team = db.Teams.FirstOrDefault(t => t.Id == teamId);
             if (team != null)
             {
                 //Изменения
@@ -28,9 +32,9 @@ namespace EfDb.Repositories
             }
         }
 
-        public static void DeleteTeam(AppEfContext db, string name)
+        public void DeleteTeam(int teamId)
         {
-            var team = db.Teams.FirstOrDefault(t => t.Name == name);
+            var team = db.Teams.FirstOrDefault(t => t.Id == teamId);
             if (team != null)
             {
                 db.Teams.Remove(team);
@@ -38,15 +42,24 @@ namespace EfDb.Repositories
             }
         }
 
-        public static void AddToTeam(AppEfContext db, string UsName, int teamId)
+        public void AddToTeam(List<int> usersId, int teamId)
         {
-            db.Teams.FirstOrDefault(t => t.Id == teamId).Users.Add(db.Users.FirstOrDefault(u => u.SecondName == UsName));
+            db.Teams.FirstOrDefault(t => t.Id == teamId).Users.AddRange(new List<User>(db.Users.Where(u => usersId.Contains(u.Id))));
             db.SaveChangesAsync();
         }
 
-        public static void RemoveFromTeam(AppEfContext db, string UsName, int teamId)
+        public void RemoveFromTeam(List<int> usersId, int teamId)
         {
-            db.Teams.FirstOrDefault(t => t.Id == teamId).Users.Remove(db.Users.FirstOrDefault(u => u.SecondName == UsName));
+            var team =  db.Teams.FirstOrDefault(t => t.Id == teamId);
+            
+            var users = db.Users.Where(u => usersId.Contains(u.Id)).ToList();
+            if (users != null && team != null)
+            {
+                for(int i = 0; i < users.Count; i++)
+                {
+                    team.Users.Remove(users[i]); // TODO: проверить удаление из тимы
+                }
+            }
             db.SaveChangesAsync();
         }
     }

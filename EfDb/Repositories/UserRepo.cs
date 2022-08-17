@@ -1,11 +1,17 @@
 ﻿
 using EfDb.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace EfDb.Repositories
 {
     public class UserRepo
     {
-        public static void CreateUser(AppEfContext db, CreateUserModel model)
+        private readonly AppEfContext db;
+        public UserRepo()
+        {
+            db = new AppEfContext();
+        }
+        public void CreateUser(CreateUserModel model)
         {
             var user = new User()
             {
@@ -17,12 +23,12 @@ namespace EfDb.Repositories
             db.SaveChanges();
         }
 
-        public static List<User> ReadUsers(AppEfContext db)
+        public List<User> ReadUsers()
         {
-            return db.Users.ToList();
+            return db.Users.Include(u => u.UserProfile).ToList();
         }
 
-        public static void UpdateUser(AppEfContext db, string sName)
+        public void UpdateUser(string sName)
         {
             var user = db.Users.FirstOrDefault(u => u.SecondName == sName);
             if (user != null)
@@ -32,7 +38,7 @@ namespace EfDb.Repositories
             }
         }
 
-        public static void DeleteUser(AppEfContext db, string sName)
+        public void DeleteUser(string sName)
         {
             var user = db.Users.FirstOrDefault(u => u.SecondName == sName);
             if (user != null)

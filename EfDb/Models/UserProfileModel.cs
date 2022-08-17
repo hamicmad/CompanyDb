@@ -6,5 +6,7 @@ namespace EfDb.Models
         public string Country { get; set; }
         public string City { get; set; }
         public string Citizenship { get; set; }
+        public int UserId { get; set; }
+
     }
 }

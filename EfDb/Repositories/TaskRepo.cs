@@ -6,7 +6,12 @@ namespace EfDb.Repositories
 {
     public class TaskRepo
     {
-        public static void CreateTask(AppEfContext db, CreateTaskModel model)
+        private readonly AppEfContext db;
+        public TaskRepo()
+        {
+            db = new AppEfContext();
+        }
+        public void CreateTask(CreateTaskModel model)
         {
             var task = new Task()
             {
@@ -19,14 +24,14 @@ namespace EfDb.Repositories
             db.SaveChangesAsync();
         }
 
-        public static List<Task> ReadTasks(AppEfContext db)
+        public List<Task> ReadTasks()
         {
             return db.Tasks.Include(t => t.User).ToList();
         }
 
-        public static void UpdateTask(AppEfContext db, int id)
+        public void UpdateTask(int id)
         {
-            var task =  db.Tasks.FirstOrDefaultAsync(t => t.Id == id);
+            var task = db.Tasks.FirstOrDefault(t => t.Id == id);
             if (task != null)
             {
                 //Изменения
@@ -34,7 +39,7 @@ namespace EfDb.Repositories
             }
         }
 
-        public static async void DeleteTask(AppEfContext db, int id)
+        public void DeleteTask(int id)
         {
             var task = db.Tasks.FirstOrDefault(t => t.Id == id);
             if (task != null)
@@ -44,13 +49,15 @@ namespace EfDb.Repositories
             }
         }
 
-        public static void AddUserToTask(AppEfContext db, string UsName, int taskId)
+        public void AddUserToTask(int UserId, int taskId)
         {
             var task = db.Tasks.FirstOrDefault(t => t.Id == taskId);
-
-            task.Status = (Status)2;
-            task.User = db.Users.FirstOrDefault(u => u.SecondName == UsName);
-            db.SaveChangesAsync();
+            if (task != null)
+            {
+                task.User = db.Users.FirstOrDefault(u => u.Id == UserId);
+                task.Status = Status.InProcess;
+                db.SaveChangesAsync();
+            }
         }
     }
 }

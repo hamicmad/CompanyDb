@@ -5,11 +5,16 @@ namespace EfDb.Repositories
 {
     public class UserProfRepo
     {
-        public static void CreateProfile(AppEfContext db, string sName, CreateProfileModel model)
+        private readonly AppEfContext db;
+        public UserProfRepo()
+        {
+            db = new AppEfContext();
+        }
+        public void CreateProfile(CreateProfileModel model)
         {
             var uProfile = new UserProfile()
             {
-                User = db.Users.FirstOrDefault(u => u.SecondName == sName),
+                User = db.Users.FirstOrDefault(u => u.Id == model.UserId),
                 Country = model.Country,
                 City = model.City,
                 Citizenship = model.Citizenship
@@ -18,15 +23,15 @@ namespace EfDb.Repositories
             db.SaveChangesAsync();
         }
 
-        public static UserProfile ReadProfile(AppEfContext db, string sName)
+        public UserProfile ReadProfile(int userId)
         {
-            var uProfile = db.UserProfiles.FirstOrDefault(p => p.User.SecondName == sName);
+            var uProfile = db.UserProfiles.Include(p => p.User).FirstOrDefault(p => p.User.Id == userId);
             if (uProfile == null)
                 return new UserProfile();
 
             return uProfile;
         }
-        public static void UppdateProfile (AppEfContext db, string sName)
+        public void UppdateProfile(string sName)
         {
             var profile = db.UserProfiles.FirstOrDefault(p => p.User.SecondName == sName);
             if (profile != null)
@@ -35,8 +40,8 @@ namespace EfDb.Repositories
                 db.SaveChangesAsync();
             }
         }
-        
-        public static void DeleteProfile(AppEfContext db, string sName)
+
+        public void DeleteProfile(string sName)
         {
             var profile = db.UserProfiles.FirstOrDefault(p => p.User.SecondName == sName);
             if (profile != null)

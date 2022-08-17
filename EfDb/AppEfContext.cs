@@ -2,7 +2,7 @@
 
 namespace EfDb
 {
-    public class AppEfContext : DbContext
+    class AppEfContext : DbContext
     {
         public DbSet<User> Users => Set<User>();
         public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
