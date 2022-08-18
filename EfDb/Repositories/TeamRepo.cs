@@ -7,60 +7,65 @@ namespace EfDb.Repositories
         private readonly AppEfContext db;
         public TeamRepo()
         {
-         db = new AppEfContext();
+            db = new AppEfContext();
         }
-        public void CreateTeam(string name, int managersAmount)
+        public async Task CreateTeamAsync(string name, int managersAmount)
         {
             var team = new Team() { Name = name, ManagersAmount = managersAmount };
 
-            db.Teams.Add(team);
-            db.SaveChangesAsync();
+            await db.Teams.AddAsync(team);
+            await db.SaveChangesAsync();
         }
 
-        public  List<Team> ReadTeams()
+        public async Task<List<Team>> ReadTeamsAsync()
         {
-            return db.Teams.Include(t => t.Users).ToList();
+            return await db.Teams.Include(t => t.Users).ToListAsync();
         }
 
-        public void UpdateTeam(int teamId)
+        public async Task UpdateTeamAsync(int teamId)
         {
-            var team = db.Teams.FirstOrDefault(t => t.Id == teamId);
+            var team = await db.Teams.FirstOrDefaultAsync(t => t.Id == teamId);
             if (team != null)
             {
                 //Изменения
-                db.SaveChangesAsync();
+                await db.SaveChangesAsync();
             }
         }
 
-        public void DeleteTeam(int teamId)
+        public async Task DeleteTeam(int teamId)
         {
-            var team = db.Teams.FirstOrDefault(t => t.Id == teamId);
+            var team = await db.Teams.FirstOrDefaultAsync(t => t.Id == teamId);
             if (team != null)
             {
                 db.Teams.Remove(team);
+                await db.SaveChangesAsync();
+            }
+        }
+
+        public async Task AddToTeamAsync(List<int> usersId, int teamId)
+        {
+            var team = await db.Teams.FirstOrDefaultAsync(t => t.Id == teamId);
+            var users = await db.Users.Where(u => usersId.Contains(u.Id)).ToListAsync();
+            if (team != null)
+            {
+                team.Users.AddRange(users);
                 db.SaveChangesAsync();
             }
         }
 
-        public void AddToTeam(List<int> usersId, int teamId)
+        public async Task RemoveFromTeamAsync(List<int> usersId, int teamId)
         {
-            db.Teams.FirstOrDefault(t => t.Id == teamId).Users.AddRange(new List<User>(db.Users.Where(u => usersId.Contains(u.Id))));
-            db.SaveChangesAsync();
-        }
+            var team = await db.Teams.Include(t => t.Users).FirstOrDefaultAsync(t => t.Id == teamId);
+            var users = await db.Users.Where(u => usersId.Contains(u.Id)).ToListAsync();
 
-        public void RemoveFromTeam(List<int> usersId, int teamId)
-        {
-            var team =  db.Teams.FirstOrDefault(t => t.Id == teamId);
-            
-            var users = db.Users.Where(u => usersId.Contains(u.Id)).ToList();
-            if (users != null && team != null)
+            if (team != null)
             {
-                for(int i = 0; i < users.Count; i++)
+                for (int i = 0; i < users.Count; i++)
                 {
                     team.Users.Remove(users[i]); // TODO: проверить удаление из тимы
                 }
             }
-            db.SaveChangesAsync();
+           await db.SaveChangesAsync();
         }
     }
 }

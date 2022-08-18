@@ -6,7 +6,7 @@ using EfDb.Repositories;
 //AppEfContext db = new AppEfContext();
 while (true)
 {
-    Console.WriteLine("1.User   2.UserProfile   3.Team  4.Task");
+    Console.WriteLine("1.User   2.UserProfile   3.Team  4.TaskDb");
     try
     {
         switch (Console.ReadLine())
@@ -23,12 +23,12 @@ while (true)
                             DateOfBirth = DateTime.Parse(Console.ReadLine())
                         };
 
-                        uRepo.CreateUser(newUser);
+                        uRepo.CreateUserAsync(newUser);
                         Console.WriteLine("Success");
                         break;
                     case "2":
-                        var users = uRepo.ReadUsers();
-                        foreach (var user in users)
+                        var users = uRepo.ReadUsersAsync();
+                        foreach (var user in users.Result)
                         {
                             Console.WriteLine($"Id: {user.Id}, fName: {user.FirstName}, sName: {user.SecondName}, Cityzenship: {user.UserProfile?.Citizenship}.");
                         }
@@ -48,12 +48,12 @@ while (true)
                             UserId = int.Parse(Console.ReadLine())
                         };
 
-                        uProf.CreateProfile(newProfile);
+                        uProf.CreateProfileAsync(newProfile);
                         Console.WriteLine("Success");
                         break;
                     case "2":
                         var userId2 = int.Parse(Console.ReadLine());
-                        var userProf = uProf.ReadProfile(userId2);
+                        var userProf = await uProf.ReadProfileAsync(userId2);
                         Console.WriteLine($"fName: {userProf.User.FirstName}, sName: {userProf.User.SecondName},\n " +
                             $"{userProf.Country} {userProf.City} ");
                         break;
@@ -66,14 +66,14 @@ while (true)
                     case "1":
                         var teamName = Console.ReadLine();
                         var managers = int.Parse(Console.ReadLine());
-                        tRepo.CreateTeam(teamName, managers);
+                        tRepo.CreateTeamAsync(teamName, managers);
                         Console.WriteLine("Success");
                         break;
                     case "2":
-                        var teams = tRepo.ReadTeams();
-                        foreach (var team in teams)
+                        var teams = tRepo.ReadTeamsAsync();
+                        foreach (var team in teams.Result)
                         {
-                            Console.WriteLine(team.Name);
+                            Console.WriteLine($"{team.Id} {team.Name}");
                             Console.Write("В команде:");
                             foreach (var u in team.Users)
                             {
@@ -100,7 +100,7 @@ while (true)
                         }
                         while (btn3.Key != ConsoleKey.Escape);
 
-                        tRepo.AddToTeam(usersId3, teamId_3);
+                        tRepo.AddToTeamAsync(usersId3, teamId_3);
                         Console.WriteLine("Success");
                         break;
                     case "4":
@@ -120,13 +120,13 @@ while (true)
                         }
                         while (btn4.Key != ConsoleKey.Escape);
 
-                        tRepo.RemoveFromTeam(usersId4, teamId_4);
+                        tRepo.RemoveFromTeamAsync(usersId4, teamId_4);
                         Console.WriteLine("Success");
                         break;
                 }
                 break;
             case "4":
-                var taskRepo = new TaskRepo();
+                var taskRepo = new TaskDbRepo();
                 switch (Console.ReadLine())
                 {
                     case "1":
@@ -137,13 +137,13 @@ while (true)
                             Status = (Status)int.Parse(Console.ReadLine()),
                             Description = Console.ReadLine()
                         };
-                        taskRepo.CreateTask(taskModel);
+                        taskRepo.CreateTaskAsync(taskModel);
                         Console.WriteLine("Success");
                         break;
                     case "2":
                         var userId4 = int.Parse(Console.ReadLine());
                         var taskId = int.Parse(Console.ReadLine());
-                        taskRepo.AddUserToTask(userId4, taskId);
+                        taskRepo.AddUserToTaskAsync(userId4, taskId);
                         Console.WriteLine("Success");
                         break;
                 }

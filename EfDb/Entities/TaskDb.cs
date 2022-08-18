@@ -2,7 +2,7 @@
 
 namespace EfDb
 {
-    public class Task
+    public class TaskDb
     {
         public int Id { get; set; }
         public TaskComplexity Complexity { get; set; }

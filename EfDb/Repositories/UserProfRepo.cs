@@ -10,30 +10,26 @@ namespace EfDb.Repositories
         {
             db = new AppEfContext();
         }
-        public void CreateProfile(CreateProfileModel model)
+        public async Task CreateProfileAsync(CreateProfileModel model)
         {
             var uProfile = new UserProfile()
             {
-                User = db.Users.FirstOrDefault(u => u.Id == model.UserId),
+                UserId = model.UserId,
                 Country = model.Country,
                 City = model.City,
                 Citizenship = model.Citizenship
             };
-            db.UserProfiles.Add(uProfile);
-            db.SaveChangesAsync();
+           await db.UserProfiles.AddAsync(uProfile);
+           await db.SaveChangesAsync();
         }
 
-        public UserProfile ReadProfile(int userId)
+        public async Task<UserProfile> ReadProfileAsync(int userId)
         {
-            var uProfile = db.UserProfiles.Include(p => p.User).FirstOrDefault(p => p.User.Id == userId);
-            if (uProfile == null)
-                return new UserProfile();
-
-            return uProfile;
+            return await db.UserProfiles.Include(p => p.User).FirstOrDefaultAsync(p => p.UserId == userId);
         }
-        public void UppdateProfile(string sName)
+        public async Task UppdateProfile(int userId)
         {
-            var profile = db.UserProfiles.FirstOrDefault(p => p.User.SecondName == sName);
+            var profile = db.UserProfiles.FirstOrDefault(p => p.UserId == userId);
             if (profile != null)
             {
                 //Изменения 
@@ -41,13 +37,13 @@ namespace EfDb.Repositories
             }
         }
 
-        public void DeleteProfile(string sName)
+        public async Task DeleteProfileAsync(int userId)
         {
-            var profile = db.UserProfiles.FirstOrDefault(p => p.User.SecondName == sName);
+            var profile = await db.UserProfiles.FirstOrDefaultAsync(p => p.UserId == userId);
             if (profile != null)
             {
-                db.UserProfiles.Remove(profile);
-                db.SaveChangesAsync();
+               db.UserProfiles.Remove(profile);
+               await db.SaveChangesAsync();
             }
         }
     }

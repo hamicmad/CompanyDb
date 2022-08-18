@@ -7,7 +7,7 @@ namespace EfDb
         public DbSet<User> Users => Set<User>();
         public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
         public DbSet<Team> Teams => Set<Team>();
-        public DbSet<Task> Tasks => Set<Task>();
+        public DbSet<TaskDb> Tasks => Set<TaskDb>();
 
         public AppEfContext()
         {
@@ -34,7 +34,7 @@ namespace EfDb
 
             modelBuilder.Entity<Team>().HasMany(t => t.Users).WithMany(u => u.Teams);
 
-            modelBuilder.Entity<Task>(entity =>
+            modelBuilder.Entity<TaskDb>(entity =>
             {
                 entity.HasOne(t => t.User).WithMany(u => u.Tasks);
 

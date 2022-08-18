@@ -11,7 +11,7 @@ namespace EfDb.Repositories
         {
             db = new AppEfContext();
         }
-        public void CreateUser(CreateUserModel model)
+        public async Task CreateUserAsync(CreateUserModel model)
         {
             var user = new User()
             {
@@ -19,32 +19,32 @@ namespace EfDb.Repositories
                 SecondName = model.SecondName,
                 DateOfBirth = model.DateOfBirth,
             };
-            db.Users.Add(user);
-            db.SaveChanges();
+            await db.Users.AddAsync(user);
+            await db.SaveChangesAsync();
         }
 
-        public List<User> ReadUsers()
+        public async Task<List<User>> ReadUsersAsync()
         {
-            return db.Users.Include(u => u.UserProfile).ToList();
+            return await db.Users.Include(u => u.UserProfile).Include(u => u.Teams).Include(u => u.Tasks).ToListAsync();
         }
 
-        public void UpdateUser(string sName)
+        public async Task UpdateUserAsync(int uId)
         {
-            var user = db.Users.FirstOrDefault(u => u.SecondName == sName);
+            var user = await db.Users.FirstOrDefaultAsync(u => u.Id == uId);
             if (user != null)
             {
                 //Изменения
-                db.SaveChanges();
+                await db.SaveChangesAsync();
             }
         }
 
-        public void DeleteUser(string sName)
+        public async Task DeleteUserAsync(int uId)
         {
-            var user = db.Users.FirstOrDefault(u => u.SecondName == sName);
+            var user = await db.Users.FirstOrDefaultAsync(u => u.Id == uId);
             if (user != null)
             {
                 db.Users.Remove(user);
-                db.SaveChanges();
+                await db.SaveChangesAsync();
             }
         }
     }

@@ -11,7 +11,7 @@ namespace EfDb
 
         public UserProfile UserProfile { get; set; }
         public List<Team> Teams { get; set; } = new();
-        public List<Task> Tasks { get; set; } = new();
+        public List<TaskDb> Tasks { get; set; } = new();
 
     }
 }
